@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Bookmark Organizer & Semantic Search",
+  "version": "1.0.0",
+  "description": "AI-powered bookmark organizer with semantic search and smart categorization",
+  "permissions": [
+    "bookmarks",
+    "storage",
+    "tabs",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://*/",
+    "https://*/"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html"
+}
