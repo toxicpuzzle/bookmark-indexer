@@ -77,6 +77,12 @@ npm run type-check
 
 # Svelte check
 npm run check
+
+# Run unit tests
+npm test
+
+# Run E2E tests (requires build first)
+npm run build && npm run test:e2e
 ```
 
 ### Project Structure
@@ -264,16 +270,48 @@ export interface MyNewType {
 
 ## 🧪 Testing
 
-Currently, the extension uses manual testing. To test:
+This project includes comprehensive unit and E2E tests.
 
-1. Build the extension: `npm run build`
-2. Load the `dist` folder in Chrome
-3. Test all features manually
+### Quick Start
 
-Future improvements could include:
-- Unit tests with Vitest
-- Component tests with Testing Library
-- E2E tests with Playwright
+```bash
+# Run unit tests
+npm test
+
+# Run unit tests with UI
+npm run test:ui
+
+# Generate coverage report
+npm run test:coverage
+
+# Run E2E tests (requires build first!)
+npm run build && npm run test:e2e
+
+# Run E2E tests with UI mode
+npm run test:e2e:ui
+```
+
+### Test Coverage
+
+**Unit Tests (Vitest):**
+- ✅ Semantic search utilities (cosine similarity, fallback search)
+- ✅ HTML escaping and XSS prevention
+- ✅ Date formatting and relative time
+- ✅ Text truncation and debouncing
+- ✅ URL validation and domain extraction
+- ✅ Array grouping utilities
+
+**E2E Tests (Playwright):**
+- ✅ Extension loading and manifest validation
+- ✅ Popup UI rendering and interactions
+- ✅ Tab switching functionality
+- ✅ Search with debouncing
+- ✅ Settings page UI and persistence
+- ✅ API key visibility toggle
+
+### Documentation
+
+For detailed testing guide, see [TESTING.md](./TESTING.md)
 
 ## 📦 Building for Production
 
