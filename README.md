@@ -1,6 +1,6 @@
 # 📚 Bookmark Organizer & Semantic Search
 
-A powerful Chrome/Edge extension that helps you organize, search, and manage your bookmarks with AI-powered descriptions and semantic search capabilities.
+A powerful Chrome/Edge extension built with **TypeScript** and **Svelte 5** that helps you organize, search, and manage your bookmarks with AI-powered descriptions and semantic search capabilities.
 
 ## ✨ Features
 
@@ -9,34 +9,142 @@ A powerful Chrome/Edge extension that helps you organize, search, and manage you
 - **🔍 Semantic Search**: Find bookmarks by meaning, not just keywords (experimental)
 - **📊 Statistics Dashboard**: Track your bookmark collection with detailed statistics
 - **⚙️ Flexible Configuration**: Choose your preferred AI provider or use manual descriptions
-- **🎨 Modern UI**: Clean, intuitive interface with gradient design
+- **🎨 Modern UI**: Clean, intuitive interface built with Svelte 5 and gradient design
 - **💾 Local Storage**: All data stored locally in your browser for privacy
 - **🔄 Auto-Sync**: Automatically processes new bookmarks as you save them
+- **🔒 Type-Safe**: Built with TypeScript for reliability and better developer experience
+
+## 🏗️ Tech Stack
+
+- **TypeScript**: Type-safe development
+- **Svelte 5**: Modern reactive UI framework with runes
+- **Vite**: Fast build tool and development server
+- **Chrome Extension Manifest V3**: Latest extension standard
+- **Chrome APIs**: Bookmarks API, Storage API, Runtime API
 
 ## 🚀 Installation
 
-### Chrome/Edge (Developer Mode)
+### For Users (Pre-built)
 
-1. **Clone or download this repository**
+1. **Clone the repository**
    ```bash
    git clone https://github.com/yourusername/bookmark-organizer.git
    cd bookmark-organizer
    ```
 
-2. **Install dependencies (optional, for development)**
+2. **Install dependencies and build**
    ```bash
    npm install
+   npm run build
    ```
 
 3. **Load the extension in Chrome/Edge**
    - Open Chrome/Edge and navigate to `chrome://extensions/` (or `edge://extensions/`)
    - Enable "Developer mode" (toggle in top-right corner)
    - Click "Load unpacked"
-   - Select the `bookmark-organizer` directory
+   - Select the `dist` directory (not the root!)
 
 4. **Grant permissions**
    - The extension will request permission to access bookmarks and storage
    - Click "Allow" to enable all features
+
+## 🛠️ Development
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Chrome or Edge browser
+
+### Setup Development Environment
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/bookmark-organizer.git
+cd bookmark-organizer
+
+# Install dependencies
+npm install
+
+# Build for production
+npm run build
+
+# Build in watch mode (auto-rebuild on changes)
+npm run dev
+
+# Type checking
+npm run type-check
+
+# Svelte check
+npm run check
+```
+
+### Project Structure
+
+```
+bookmark-organizer/
+├── src/
+│   ├── background/
+│   │   └── background.ts        # Service worker
+│   ├── popup/
+│   │   ├── Popup.svelte         # Main popup component
+│   │   ├── index.html           # Popup HTML entry
+│   │   ├── main.ts              # Popup entry point
+│   │   └── popup.css            # Popup styles
+│   ├── options/
+│   │   ├── Options.svelte       # Settings page component
+│   │   ├── index.html           # Options HTML entry
+│   │   ├── main.ts              # Options entry point
+│   │   └── options.css          # Options styles
+│   ├── components/
+│   │   ├── BookmarkItem.svelte  # Bookmark display component
+│   │   └── Stats.svelte         # Statistics component
+│   ├── lib/
+│   │   └── semantic-search.ts   # Semantic search implementation
+│   └── types/
+│       └── index.ts             # TypeScript type definitions
+├── public/
+│   └── manifest.json            # Extension manifest (copied to dist)
+├── dist/                        # Build output (load this in browser)
+├── vite.config.ts               # Vite configuration
+├── tsconfig.json                # TypeScript configuration
+├── svelte.config.js             # Svelte configuration
+└── package.json
+```
+
+### Making Changes
+
+1. **Edit source files** in the `src/` directory
+2. **Run build** with `npm run build` or `npm run dev` (watch mode)
+3. **Reload extension** in Chrome:
+   - Go to `chrome://extensions/`
+   - Click the refresh icon on the extension card
+4. **Test your changes**
+
+### Creating New Components
+
+```typescript
+// src/components/MyComponent.svelte
+<script lang="ts">
+  import type { BookmarkWithEnhanced } from '../types';
+
+  interface Props {
+    data: BookmarkWithEnhanced[];
+  }
+
+  let { data }: Props = $props();
+
+  // Use Svelte 5 runes
+  let count = $state(0);
+  let doubled = $derived(count * 2);
+</script>
+
+<div>
+  <p>Count: {count}</p>
+  <p>Doubled: {doubled}</p>
+  <button onclick={() => count++}>Increment</button>
+</div>
+```
 
 ## 🔧 Setup & Configuration
 
@@ -101,87 +209,90 @@ When enabled, semantic search understands the meaning of your query:
 
 The AI will find relevant bookmarks based on meaning, not just exact keyword matches.
 
-## 🏗️ Architecture
-
-### File Structure
-
-```
-bookmark-organizer/
-├── manifest.json           # Extension configuration
-├── background.js           # Service worker for bookmark processing
-├── popup.html             # Main popup interface
-├── popup.js               # Popup logic and UI handling
-├── options.html           # Settings page
-├── options.js             # Settings page logic
-├── semantic-search.js     # Semantic search implementation
-├── package.json           # NPM dependencies
-├── icons/                 # Extension icons
-│   ├── icon16.svg
-│   ├── icon48.svg
-│   └── icon128.svg
-└── README.md
-```
-
-### Key Technologies
-
-- **Manifest V3**: Latest Chrome extension standard
-- **Chrome Bookmarks API**: Native bookmark access
-- **Chrome Storage API**: Local and sync storage
-- **Transformers.js**: Browser-based ML for semantic search (optional)
-- **OpenAI/Anthropic APIs**: AI description generation
-
 ## 🔐 Privacy & Security
 
 - **Local Storage**: All bookmark data and metadata stored locally
 - **API Keys**: Stored in browser sync storage, never transmitted except to AI providers
 - **No Tracking**: No analytics or data collection
 - **Open Source**: Full source code available for inspection
+- **Type Safety**: TypeScript ensures code reliability
 
-## 🛠️ Development
+## 📝 Adding New Features
 
-### Prerequisites
+### Background Script Tasks
 
-- Node.js 16+ (for development dependencies)
-- Chrome or Edge browser
+Edit `src/background/background.ts` to add new background processing:
 
-### Setup Development Environment
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/bookmark-organizer.git
-cd bookmark-organizer
-
-# Install dependencies
-npm install
-
-# Build CSS (if using Tailwind)
-npm run build:css
-
-# Watch for changes
-npm run watch:css
+```typescript
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'myNewAction') {
+    // Handle your new action
+    myNewFunction().then(sendResponse);
+    return true;
+  }
+});
 ```
 
-### Testing
+### UI Components
 
-1. Make changes to the code
-2. Go to `chrome://extensions/`
-3. Click the refresh icon on the extension card
-4. Test your changes
+Create new Svelte components in `src/components/`:
 
-### Adding New Features
+```svelte
+<script lang="ts">
+  // Your component logic
+</script>
 
-The extension is designed to be modular:
+<div>
+  <!-- Your component HTML -->
+</div>
 
-- **Background Tasks**: Add to `background.js`
-- **UI Components**: Modify `popup.html` and `popup.js`
-- **Settings**: Update `options.html` and `options.js`
-- **Search Logic**: Enhance `semantic-search.js`
+<style>
+  /* Component-scoped styles */
+</style>
+```
+
+### Type Definitions
+
+Add new types to `src/types/index.ts`:
+
+```typescript
+export interface MyNewType {
+  id: string;
+  data: string;
+}
+```
+
+## 🧪 Testing
+
+Currently, the extension uses manual testing. To test:
+
+1. Build the extension: `npm run build`
+2. Load the `dist` folder in Chrome
+3. Test all features manually
+
+Future improvements could include:
+- Unit tests with Vitest
+- Component tests with Testing Library
+- E2E tests with Playwright
+
+## 📦 Building for Production
+
+```bash
+# Clean build
+npm run build
+
+# The dist/ folder contains the complete extension
+# Zip it for distribution:
+cd dist
+zip -r ../bookmark-organizer.zip .
+```
 
 ## 📝 TODO / Roadmap
 
-- [ ] Convert SVG icons to PNG format for better compatibility
-- [ ] Implement advanced categorization using AI
-- [ ] Add folder organization suggestions
+- [ ] Add unit tests with Vitest
+- [ ] Implement browser-based embeddings (no API required)
+- [ ] Add advanced categorization using AI
+- [ ] Folder organization suggestions
 - [ ] Export/import bookmark collections
 - [ ] Tag management system
 - [ ] Duplicate bookmark detection
@@ -189,13 +300,10 @@ The extension is designed to be modular:
 - [ ] Firefox support
 - [ ] Dark mode support
 - [ ] Custom themes
-- [ ] Browser-based embeddings (no API required)
-- [ ] Collaborative bookmark collections
 
 ## 🐛 Known Issues
 
-- **Icon Format**: Currently using SVG icons; Chrome prefers PNG format
-- **Semantic Search**: Requires transformers.js library (not yet integrated)
+- **Semantic Search**: Requires transformers.js library integration
 - **Rate Limiting**: AI description generation may hit API rate limits with large collections
 - **Performance**: Processing thousands of bookmarks may take time
 
@@ -203,11 +311,22 @@ The extension is designed to be modular:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+### Development Workflow
+
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+3. Make your changes in the `src/` directory
+4. Build and test (`npm run build`)
+5. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+6. Push to the branch (`git push origin feature/AmazingFeature`)
+7. Open a Pull Request
+
+### Code Style
+
+- Use TypeScript for all new code
+- Follow existing code patterns
+- Add types for all new interfaces
+- Write descriptive commit messages
 
 ## 📄 License
 
@@ -215,8 +334,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
+- Built with Svelte 5 and TypeScript
 - Icons and design inspired by modern UI/UX principles
-- Built with Chrome Extension Manifest V3
+- Chrome Extension Manifest V3
 - Semantic search powered by Transformers.js
 - AI descriptions by OpenAI and Anthropic
 
@@ -225,8 +345,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you encounter any issues or have questions:
 
 1. Check the [Known Issues](#-known-issues) section
-2. Search existing GitHub issues
-3. Create a new issue with detailed information
+2. Review the build output for errors
+3. Ensure you're loading the `dist` folder (not root)
+4. Search existing GitHub issues
+5. Create a new issue with detailed information
 
 ## 🌟 Show Your Support
 
@@ -236,7 +358,10 @@ If you find this extension helpful, please consider:
 - 🐛 Reporting bugs
 - 💡 Suggesting new features
 - 📢 Sharing with others
+- 🤝 Contributing code
 
 ---
 
 **Happy Bookmarking! 📚✨**
+
+Built with ❤️ using TypeScript & Svelte 5

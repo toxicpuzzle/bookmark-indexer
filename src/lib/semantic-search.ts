@@ -1,20 +1,19 @@
 // Semantic search implementation using local embeddings
-// This module provides semantic search capabilities without requiring external APIs
+import type { BookmarkWithEnhanced } from '../types';
 
-class SemanticSearch {
-  constructor() {
-    this.model = null;
-    this.initialized = false;
-  }
+export class SemanticSearch {
+  private model: any = null;
+  private initialized: boolean = false;
 
   // Initialize the semantic search model
-  async initialize() {
+  async initialize(): Promise<boolean> {
     if (this.initialized) return true;
 
     try {
       console.log('Initializing semantic search...');
 
       // Check if transformers.js is available
+      // @ts-ignore - Dynamic import from CDN
       if (typeof transformers === 'undefined') {
         console.warn('Transformers.js not loaded, semantic search unavailable');
         return false;
@@ -22,6 +21,7 @@ class SemanticSearch {
 
       // Load a lightweight embedding model
       // Using all-MiniLM-L6-v2 for fast, efficient embeddings
+      // @ts-ignore - Dynamic import
       const { pipeline } = transformers;
       this.model = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
 
@@ -35,7 +35,7 @@ class SemanticSearch {
   }
 
   // Generate embedding for text
-  async embed(text) {
+  async embed(text: string): Promise<number[]> {
     if (!this.initialized) {
       await this.initialize();
     }
@@ -54,7 +54,7 @@ class SemanticSearch {
   }
 
   // Calculate cosine similarity between two embeddings
-  cosineSimilarity(a, b) {
+  cosineSimilarity(a: number[], b: number[]): number {
     if (a.length !== b.length) {
       throw new Error('Embeddings must have the same length');
     }
@@ -73,7 +73,11 @@ class SemanticSearch {
   }
 
   // Search bookmarks using semantic similarity
-  async search(query, bookmarks, topK = 10) {
+  async search(
+    query: string,
+    bookmarks: BookmarkWithEnhanced[],
+    topK: number = 10
+  ): Promise<BookmarkWithEnhanced[]> {
     if (!this.initialized) {
       await this.initialize();
     }
@@ -88,18 +92,18 @@ class SemanticSearch {
       const queryEmbedding = await this.embed(query);
 
       // Calculate similarity for each bookmark
-      const results = [];
+      const results: Array<{ bookmark: BookmarkWithEnhanced; similarity: number }> = [];
 
       for (const bookmark of bookmarks) {
         // Create searchable text from bookmark
         const searchText = [
           bookmark.title || '',
           bookmark.enhanced?.description || '',
-          bookmark.url || ''
+          bookmark.url || '',
         ].join(' ');
 
         // Generate embedding for bookmark if not cached
-        let bookmarkEmbedding;
+        let bookmarkEmbedding: number[];
         if (bookmark.enhanced?.embedding) {
           bookmarkEmbedding = bookmark.enhanced.embedding;
         } else {
@@ -118,13 +122,13 @@ class SemanticSearch {
 
         results.push({
           bookmark,
-          similarity
+          similarity,
         });
       }
 
       // Sort by similarity and return top K
       results.sort((a, b) => b.similarity - a.similarity);
-      return results.slice(0, topK).map(r => r.bookmark);
+      return results.slice(0, topK).map((r) => r.bookmark);
     } catch (error) {
       console.error('Error in semantic search:', error);
       return this.fallbackSearch(query, bookmarks, topK);
@@ -132,25 +136,34 @@ class SemanticSearch {
   }
 
   // Fallback to simple text search
-  fallbackSearch(query, bookmarks, topK) {
+  private fallbackSearch(
+    query: string,
+    bookmarks: BookmarkWithEnhanced[],
+    topK: number
+  ): BookmarkWithEnhanced[] {
     const lowerQuery = query.toLowerCase();
 
-    const results = bookmarks.filter(bookmark => {
+    const results = bookmarks.filter((bookmark) => {
       const title = (bookmark.title || '').toLowerCase();
       const url = (bookmark.url || '').toLowerCase();
       const description = (bookmark.enhanced?.description || '').toLowerCase();
 
-      return title.includes(lowerQuery) ||
-             url.includes(lowerQuery) ||
-             description.includes(lowerQuery);
+      return (
+        title.includes(lowerQuery) ||
+        url.includes(lowerQuery) ||
+        description.includes(lowerQuery)
+      );
     });
 
     return results.slice(0, topK);
   }
 
   // Batch generate embeddings for multiple bookmarks
-  async batchEmbed(bookmarks, progressCallback) {
-    const results = [];
+  async batchEmbed(
+    bookmarks: BookmarkWithEnhanced[],
+    progressCallback?: (processed: number, total: number) => void
+  ): Promise<Array<{ id: string; embedding: number[] }>> {
+    const results: Array<{ id: string; embedding: number[] }> = [];
     let processed = 0;
 
     for (const bookmark of bookmarks) {
@@ -158,7 +171,7 @@ class SemanticSearch {
         const searchText = [
           bookmark.title || '',
           bookmark.enhanced?.description || '',
-          bookmark.url || ''
+          bookmark.url || '',
         ].join(' ');
 
         const embedding = await this.embed(searchText);
@@ -183,9 +196,4 @@ class SemanticSearch {
 
     return results;
   }
-}
-
-// Export for use in background script
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = SemanticSearch;
 }
