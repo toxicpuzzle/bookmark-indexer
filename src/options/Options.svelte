@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import type { ExtensionSettings, SyncResult } from '../types';
 
   let settings = $state<ExtensionSettings>({
@@ -17,7 +18,7 @@
   let syncing = $state(false);
 
   // Load settings on mount
-  $effect(() => {
+  onMount(() => {
     loadSettings();
     loadSyncInfo();
   });

@@ -1,26 +1,36 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import type { BookmarkWithEnhanced } from '../types';
   import BookmarkItem from '../components/BookmarkItem.svelte';
   import Stats from '../components/Stats.svelte';
 
   let allBookmarks = $state<BookmarkWithEnhanced[]>([]);
-  let displayedBookmarks = $state<BookmarkWithEnhanced[]>([]);
   let currentTab = $state<'all' | 'uncategorized' | 'stats'>('all');
   let searchQuery = $state('');
+  let searchResults = $state<BookmarkWithEnhanced[] | null>(null);
   let loading = $state(true);
+  let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  // Use $derived for filtered bookmarks based on current tab
+  let filteredBookmarks = $derived<BookmarkWithEnhanced[]>(() => {
+    switch (currentTab) {
+      case 'all':
+        return allBookmarks;
+      case 'uncategorized':
+        return allBookmarks.filter((b) => !b.enhanced || !b.enhanced.description);
+      default:
+        return allBookmarks;
+    }
+  }());
+
+  // Display either search results or filtered bookmarks
+  let displayedBookmarks = $derived<BookmarkWithEnhanced[]>(
+    searchResults !== null ? searchResults : filteredBookmarks
+  );
 
   // Load bookmarks on mount
-  $effect(() => {
+  onMount(() => {
     loadBookmarks();
-  });
-
-  // Update displayed bookmarks when tab or search changes
-  $effect(() => {
-    if (searchQuery.trim().length > 0) {
-      handleSearch();
-    } else {
-      filterBookmarks();
-    }
   });
 
   async function loadBookmarks() {
@@ -28,7 +38,6 @@
       loading = true;
       const response = await chrome.runtime.sendMessage({ action: 'getAllBookmarks' });
       allBookmarks = response || [];
-      filterBookmarks();
     } catch (error) {
       console.error('Error loading bookmarks:', error);
       allBookmarks = [];
@@ -37,42 +46,46 @@
     }
   }
 
-  function filterBookmarks() {
-    switch (currentTab) {
-      case 'all':
-        displayedBookmarks = allBookmarks;
-        break;
-      case 'uncategorized':
-        displayedBookmarks = allBookmarks.filter(
-          (b) => !b.enhanced || !b.enhanced.description
-        );
-        break;
-      default:
-        displayedBookmarks = allBookmarks;
+  function handleSearchInput() {
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
-  }
 
-  async function handleSearch() {
-    if (searchQuery.trim().length < 2) {
-      filterBookmarks();
+    // If search is empty, show filtered bookmarks
+    if (searchQuery.trim().length === 0) {
+      searchResults = null;
       return;
     }
 
+    // If search is too short, don't search yet
+    if (searchQuery.trim().length < 2) {
+      return;
+    }
+
+    // Debounce search
+    searchTimeout = setTimeout(() => {
+      performSearch();
+    }, 300);
+  }
+
+  async function performSearch() {
     try {
       const results = await chrome.runtime.sendMessage({
         action: 'searchBookmarks',
         query: searchQuery,
       });
-      displayedBookmarks = results || [];
+      searchResults = results || [];
     } catch (error) {
       console.error('Search error:', error);
-      displayedBookmarks = [];
+      searchResults = [];
     }
   }
 
   function switchTab(tab: 'all' | 'uncategorized' | 'stats') {
     currentTab = tab;
     searchQuery = '';
+    searchResults = null;
   }
 
   function handleBookmarkClick(bookmark: BookmarkWithEnhanced) {
@@ -89,6 +102,7 @@
       <input
         type="text"
         bind:value={searchQuery}
+        oninput={handleSearchInput}
         placeholder="Search bookmarks..."
       />
     </div>
