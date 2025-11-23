@@ -1,3 +1,5 @@
+UNDER CONSTRUCTION - VIBE CODED ATM
+
 # 📚 Bookmark Organizer & Semantic Search
 
 A powerful Chrome/Edge extension built with **TypeScript** and **Svelte 5** that helps you organize, search, and manage your bookmarks with AI-powered descriptions and semantic search capabilities.
